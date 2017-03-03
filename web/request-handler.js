@@ -2,21 +2,14 @@ var path = require('path');
 var archive = require('../helpers/archive-helpers');
 var fs = require('fs');
 var utils = require('./http-helpers');
-var index;
-var getData;
-var postData;
-fs.readFile('./web/public/index.html', 'utf8', (err, data) => {
-  if (err) {
-    throw err;
-  }
-  index = data;
-  
-});
+var CRON = require('../workers/htmlfetcher');//run the cronjob, hopefully
+
 
 actions = {
   GET: function (req, res) {
     if (req.url === '/') {
-      utils.respond(res, index, 200);
+      utils.serveAssets(res, '/index.html');
+      // utils.respond(res, index, 200);
     } else if (fs.existsSync(archive.paths.archivedSites + req.url)) {
       fs.readFile(archive.paths.archivedSites + req.url, 'utf8', (err, data) => {
         getData = data;
@@ -37,12 +30,10 @@ actions = {
         //archived?
           archive.isUrlArchived(URL, function (isArchived) {
             if (isArchived) {
-              
-            //yes
+              utils.redirect(res, '/' + URL);
               //display page
             } else {
-            //no
-              //display loading
+              utils.redirect(res, '/loading.html');
             }
           });
         } else {
@@ -50,8 +41,7 @@ actions = {
           //put into sites.txt
           archive.addUrlToList(URL, function () {
             //reroute to display loading
-            res.writeHead(302);
-            res.end();
+            utils.redirect(res, '/loading.html');
           });   
         }
       });
@@ -62,5 +52,4 @@ actions = {
 exports.handleRequest = function (req, res) {
   action = actions[req.method];
   action ? action(req, res) : utils.respond(res, 'Not Found', 404);
-
 };

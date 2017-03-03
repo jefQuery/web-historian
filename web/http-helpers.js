@@ -17,6 +17,12 @@ exports.respond = function(response, obj, status) {
   response.end(obj);
 };
 
+exports.redirect = function(response, location, status) {
+  status = status || 302;
+  response.writeHead(status, {location: location});
+  response.end();
+};
+
 exports.collectData = function(request, callback) {
   var body = '';
   // request.on('error', function(err) {
@@ -32,17 +38,31 @@ exports.collectData = function(request, callback) {
   });
 };
 
-exports.serveAssets = function(res, asset, callback) {
+exports.serveAssets = function(res, URL, callback) {
 
-  //assesst is the static file 
-  //basePath 
-  //var file = fs.read(basePath + url.pathname)//?? 
+  //basePath === archive.paths...
 
   // Write some code here that helps serve up your static files!
   // (Static files are things like html (yours or archived from others...),
   // css, or anything that doesn't change often.)
 
-
+  //assesst is the static file ?
+  fs.readFile( archive.paths.siteAssets + URL, {encoding: 'utf8'}, function(err, data) {
+  //var file = fs.read(basePath + url.pathname)// 
+    if (err) {
+      // file isn't in main web repository
+      fs.readFile( archive.paths.archivedSites + URL, {encoding: 'utf8'}, function(err, data) {
+        if (err) {
+          // file isn't in archives folder
+          callback ? callback() : exports.respond(res, 'Not found', 404);
+        } else {
+          exports.respond(res, data);
+        }
+      });
+    } else {
+      exports.respond(res, data);
+    }
+  }); 
 };
 
 
