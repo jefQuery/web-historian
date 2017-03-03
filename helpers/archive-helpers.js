@@ -28,23 +28,23 @@ exports.initialize = function(pathsObj) {
 // modularize your code. Keep it clean!
 
 exports.readListOfUrls = function(callback) {
-  var sites = null;
   // grab sites.txt
-  fs.readFile('', 'utf-8', (err, data) => {
+  fs.readFile(exports.paths.list, 'utf-8', (err, data) => {
     if (err) {
       throw err;
     }
-    sites = data;
+    console.log(data);
+    callback(data.split('\n'));
   });
 
   // iterate over the list (or split on \n characters, remove empty strings (if string === "", don't push))
-  sitesArr = sites.split('\n');
   // return an array of string URLs
-  return sitesArr;
 };
 
 exports.isUrlInList = function(url, callback) {
-  
+  exports.readListOfUrls(function (urls) {
+    callback(_.contains(urls, url));
+  });
   //search through array of string URLs
   //if there, 
     //return true or run callback
@@ -63,20 +63,30 @@ exports.addUrlToList = function(url, callback) { //should append submitted sites
     if (err) {
       throw err;
     }
-    callback();
+    callback(data);
   });
-  // sitesArr = sites(split('\n'));
+  // sitesArr = sites.split('\n');
     //reformat to a string list
 };
 
 exports.isUrlArchived = function(url, callback) {
-  // if url is archived
+  // if url is archived exports.paths.archivedSites
     //return the cached webpage
   //else, assuming this only runs after addURLToList
     //return /serve the loading.html page 
+
+  fs.access(exports.paths.archivedSites + '/' + url, (err) => {
+    console.log(err ? 'no access!' : 'can read/write');
+    callback(!err);
+  });  
 
 };
 
 exports.downloadUrls = function(urls) {
   //CRON JOB THING
+
+  //call HTML fetcher
+  //pass addurltolist as callback
+  //work complete
+
 };

@@ -11,6 +11,12 @@ exports.headers = {
   'Content-Type': 'text/html'
 };
 
+exports.respond = function(response, obj, status) {
+  status = status || 200;
+  response.writeHead(status, exports.headers);
+  response.end(obj);
+};
+
 exports.collectData = function(request, callback) {
   var body = '';
   // request.on('error', function(err) {
